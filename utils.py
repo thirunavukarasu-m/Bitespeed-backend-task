@@ -1,4 +1,4 @@
-from models import Contact
+from models import db, Contact
 
 def get_primary_contact(email = None, phone_number = None):
     """
@@ -18,7 +18,7 @@ def get_primary_contact(email = None, phone_number = None):
     
     return "Please provide either an email or a phone number to retrieve the primary contact."
 
-def get_secondary_contact_ids(primary_contact_id):
+def get_secondary_contacts(primary_contact_id):
     """
     Retrieve secondary contacts linked to a primary contact.
     
@@ -29,6 +29,34 @@ def get_secondary_contact_ids(primary_contact_id):
         list: A list of secondary contacts linked to the primary contact.
     """
     
-    return [row[0] for row in Contact.query.filter_by(linkedId=primary_contact_id, linkPrecedence='secondary').with_entities(Contact.id).all()]if primary_contact_id else []
+    return Contact.query.filter_by(linkedId=primary_contact_id, linkPrecedence='secondary').with_entities(Contact.id, Contact.email, Contact.phoneNumber).all() if primary_contact_id else None
 
+def create_contact(phone, email, contact_type, linked_id = None):
 
+    contact = Contact(
+        phoneNumber=phone,
+        email=email,
+        linkPrecedence=contact_type,
+        linkedId=linked_id
+    )
+    db.session.add(contact)
+    db.session.commit()
+    return contact
+
+def format_response(primary_contact, secondary_contacts=None):
+
+    emails = list(dict.fromkeys(
+        contact.email for contact in [primary_contact] + (secondary_contacts or []) if contact.email
+    ))
+    phonenumbers = list(dict.fromkeys(
+        contact.phoneNumber for contact in [primary_contact] + (secondary_contacts or []) if contact.phoneNumber
+    ))
+
+    return {
+        "contact": {
+            "primaryContactId": primary_contact.id,
+            "emails": emails,
+            "phoneNumbers": phonenumbers,
+            "secondaryContactIds": [row[0] for row in secondary_contacts] if secondary_contacts else []
+        }
+    }
