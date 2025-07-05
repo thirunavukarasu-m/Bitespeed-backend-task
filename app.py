@@ -3,6 +3,8 @@ from config import Config
 from models import db, Contact
 import os
 from dotenv import load_dotenv
+from flask import jsonify
+from utils import create_contact, format_response
 
 load_dotenv()
 app = Flask(__name__)
@@ -35,6 +37,23 @@ def view_contacts():
     
     contacts = Contact.query.order_by(Contact.id).all()
     return render_template('contacts.html', contacts=contacts)
+
+@app.route('/identify', methods=['POST'])
+def add_or_update_contact():
+    phone_number = request.json.get('phoneNumber')
+    email = request.json.get('email')
+
+    if not phone_number and not email:
+        return jsonify({"error": "Phone number or email is required"}), 400
+
+    phone_contact = Contact.query.filter_by(phoneNumber=phone_number).first() if phone_number else None
+    email_contact = Contact.query.filter_by(email=email).first() if email else None
+
+    # Case 1: No existing contacts – create new primary
+    if not phone_contact and not email_contact:
+        new_contact = create_contact(phone_number, email, 'primary')
+        return jsonify(format_response(new_contact)), 200
+
 
 if __name__ == "__main__":
     with app.app_context():
