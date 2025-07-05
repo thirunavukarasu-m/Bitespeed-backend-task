@@ -4,7 +4,7 @@ from models import db, Contact
 import os
 from dotenv import load_dotenv
 from flask import jsonify
-from utils import get_secondary_contacts, create_contact, format_response
+from utils import get_primary_contact, get_secondary_contacts, create_contact, format_response
 
 load_dotenv()
 app = Flask(__name__)
@@ -65,26 +65,22 @@ def add_or_update_contact():
             return jsonify(format_response(phone_contact)), 200
         
         # Case 4: Both exist but might be different records – resolve hierarchy
-        valid_object = phone_contact if phone_contact.createdAt <= email_contact.createdAt else email_contact
-        primary_contact_id = valid_object.id if valid_object.linkPrecedence == 'primary' else valid_object.linkedId
-        primary_contact = Contact.query.get(primary_contact_id)
+        primary_contact = get_primary_contact(phone_contact, email_contact, resolve_hierarchy = True)
         secondary_contact = email_contact if primary_contact == phone_contact else phone_contact
 
         if secondary_contact.linkPrecedence != 'secondary':
             secondary_contact.linkPrecedence = 'secondary'
-            secondary_contact.linkedId = primary_contact_id
+            secondary_contact.linkedId = primary_contact.id
             db.session.commit()
 
         related_contacts = get_secondary_contacts(primary_contact.id)
 
     else:
         # Case 2: Only one exists – reuse it as primary, create new secondary
-        valid_object = phone_contact or email_contact
-        primary_contact_id = valid_object.id if valid_object.linkPrecedence == 'primary' else valid_object.linkedId
-        primary_contact = Contact.query.get(primary_contact_id)
-        create_contact(phone_number, email, 'secondary', linked_id=primary_contact_id)
+        primary_contact = get_primary_contact(phone_contact, email_contact, resolve_hierarchy = False)
+        create_contact(phone_number, email, 'secondary', linked_id=primary_contact.id)
 
-        related_contacts = get_secondary_contacts(primary_contact_id)
+        related_contacts = get_secondary_contacts(primary_contact.id)
 
     return jsonify(format_response(primary_contact, related_contacts)), 200
 
