@@ -39,8 +39,12 @@ def view_contacts():
     contacts = Contact.query.order_by(Contact.id).all()
     return render_template('contacts.html', contacts=contacts)
 
-@app.route('/identify', methods=['POST'])
+@app.route('/identify', methods=['GET','POST'])
 def add_or_update_contact():
+    
+    if request.method == 'GET':
+        return render_template("identify.html")
+
     phone_number = request.json.get('phoneNumber')
     email = request.json.get('email')
 
