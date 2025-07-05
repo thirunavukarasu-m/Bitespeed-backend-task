@@ -64,6 +64,19 @@ def add_or_update_contact():
         if phone_contact.id == email_contact.id:
             return jsonify(format_response(phone_contact)), 200
         
+        # Case 4: Both exist but might be different records – resolve hierarchy
+        valid_object = phone_contact if phone_contact.createdAt <= email_contact.createdAt else email_contact
+        primary_contact_id = valid_object.id if valid_object.linkPrecedence == 'primary' else valid_object.linkedId
+        primary_contact = Contact.query.get(primary_contact_id)
+        secondary_contact = email_contact if primary_contact == phone_contact else phone_contact
+
+        if secondary_contact.linkPrecedence != 'secondary':
+            secondary_contact.linkPrecedence = 'secondary'
+            secondary_contact.linkedId = primary_contact_id
+            db.session.commit()
+
+        related_contacts = get_secondary_contacts(primary_contact.id)
+
     else:
         # Case 2: Only one exists – reuse it as primary, create new secondary
         valid_object = phone_contact or email_contact
