@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Identify Contact | Bitespeed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            padding: 2rem;
+            color: #111827;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #2563eb;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        code {
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .tool-list {
+            list-style-type: square;
+            padding-left: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Identify Contact API</h1>
+        <p>
+            This endpoint is used to identify and manage user contacts based on phone number and/or email.
+        </p>
+
+        <p><strong>Endpoint:</strong> <code>POST /identify</code></p>
+        <p><strong>Base URL (Production):</strong> <code>https://bitespeed-backend-task-gvq5.onrender.com/identify</code></p>
+
+        <h3>Request Payload</h3>
+        <p>Send a JSON body like this:</p>
+        <code>
+            {
+                "phoneNumber": "9876543210",
+                "email": "user@example.com"
+            }
+        </code>
+
+        <h3>How to Test</h3>
+        <p>You cannot test this via browser directly. Please use API tools like:</p>
+        <ul class="tool-list">
+            <li><a href="https://hoppscotch.io" target="_blank">Hoppscotch</a></li>
+            <li><a href="https://www.postman.com" target="_blank">Postman</a></li>
+        </ul>
+
+        <p>Choose <code>POST</code> method, enter the endpoint, and send a raw JSON body as shown above.</p>
+        <p>Once submitted, you will receive a JSON response with the resolved primary and secondary contact details.</p>
+    </div>
+</body>
+</html>
