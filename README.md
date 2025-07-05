@@ -13,6 +13,24 @@ A Flask-based backend system for **identity reconciliation**, allowing deduplica
 
 ---
 
+### 🔀 Branching Strategy
+
+This project follows real-world professional development practices:
+
+* **`main`** – Stable production branch deployed to Render Production
+* **`development`** – Integration branch where feature branches are merged and tested before production release
+* **Feature branches** – Each feature is developed in its own branch (e.g., `feature/admin-login-page`, `feature/identity-endpoint`)
+* **Hotfix / Release branches** – Temporary branches like `push-to-prod/05-07-2025` used for final production merges or patches
+
+All feature branches go through a Pull Request and review before merging into `development` and then `main`.
+
+Example Pull Requests:
+
+* Added `/identify` endpoint
+* Created login and contact view pages
+* Setup production deployment requirements
+
+
 ## 🧩 Features
 
 * ✅ `/identify` API to manage and reconcile contact information
