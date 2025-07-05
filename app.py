@@ -9,6 +9,7 @@ from utils import get_primary_contact, get_secondary_contacts, create_contact, f
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+env = os.getenv("FLASK_ENV", "uat") 
 app.config.from_object(Config)
 db.init_app(app)
 
@@ -87,4 +88,4 @@ def add_or_update_contact():
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True if env == "uat" else False)
