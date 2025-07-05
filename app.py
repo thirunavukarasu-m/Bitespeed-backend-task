@@ -4,7 +4,7 @@ from models import db, Contact
 import os
 from dotenv import load_dotenv
 from flask import jsonify
-from utils import create_contact, format_response
+from utils import get_secondary_contacts, create_contact, format_response
 
 load_dotenv()
 app = Flask(__name__)
@@ -54,6 +54,26 @@ def add_or_update_contact():
         new_contact = create_contact(phone_number, email, 'primary')
         return jsonify(format_response(new_contact)), 200
 
+    # Determine primary contact
+    primary_contact = None
+    related_contacts = []
+
+    if phone_contact and email_contact:
+
+        # Case 3: Both exist and exactly match – return the same contact
+        if phone_contact.id == email_contact.id:
+            return jsonify(format_response(phone_contact)), 200
+        
+    else:
+        # Case 2: Only one exists – reuse it as primary, create new secondary
+        valid_object = phone_contact or email_contact
+        primary_contact_id = valid_object.id if valid_object.linkPrecedence == 'primary' else valid_object.linkedId
+        primary_contact = Contact.query.get(primary_contact_id)
+        create_contact(phone_number, email, 'secondary', linked_id=primary_contact_id)
+
+        related_contacts = get_secondary_contacts(primary_contact_id)
+
+    return jsonify(format_response(primary_contact, related_contacts)), 200
 
 if __name__ == "__main__":
     with app.app_context():
